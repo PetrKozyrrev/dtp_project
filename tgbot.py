@@ -2,6 +2,8 @@
 
 import re
 import sqlite3
+import matplotlib.pyplot as plt
+import numpy as np
 import telebot
 from telebot import types
 from buttons import *
@@ -274,6 +276,7 @@ def bot_message(message):
         sql2 = f"SELECT SUM(dead_count),SUM(injured_count),COUNT(tags) FROM data WHERE region = '{region_2}' AND datetime LIKE '{datetime_2}%'"
         cursor.execute(sql2)
         st2 = cursor.fetchall()
+
         bot.send_message(message.chat.id, f"В регионе {region_1} за {datetime_1}:\n"
                                           f"Смертность в дтп: {st1[0][0]}\n"
                                           f"Раненые: {st1[0][1]}\n"
@@ -284,5 +287,25 @@ def bot_message(message):
                                           f"Раненые: {st2[0][1]}\n"
                                           f"Количество дтп: {st2[0][2]}\n")
 
+        labels = ['Кол-во смертей', 'Кол-во раненых', 'Кол-во дтп']
 
-bot.polling()
+        x = np.arange(len(labels))  # the label locations
+        width = 0.35  # the width of the bars
+
+        fig, ax = plt.subplots()
+        rects1 = ax.bar(x - width / 2, st1[0], width, label=f'{region_1} {datetime_1}')
+        rects2 = ax.bar(x + width / 2, st2[0], width, label=f'{region_2} {datetime_2}')
+
+        ax.set_xticks(x, labels)
+        ax.legend(loc='upper left')
+
+        ax.bar_label(rects1, padding=3)
+        ax.bar_label(rects2, padding=3)
+
+        fig.tight_layout()
+        plt.savefig('img/1.png')
+
+        bot.send_photo(message.chat.id, open("img/1.png", 'rb'))
+
+
+bot.polling(none_stop=True)
