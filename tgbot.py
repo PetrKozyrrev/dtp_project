@@ -57,7 +57,7 @@ def start(message):
 
 @bot.message_handler(content_types=["text"])
 def bot_message(message):
-    global region
+    global region, region_1, region_2
     if message.text == "Просмотр статистики":
         markup = types.ReplyKeyboardRemove()
         bot.send_message(message.chat.id, "Выберите регион:", reply_markup=markup)
@@ -149,8 +149,8 @@ def bot_message(message):
     elif message.text in region_lst:
         region = message.text
         bot.send_message(message.chat.id, "Укажите дату в формате YYYY-MM-DD или YYYY-MM или YYYY")
-    elif re.search(r"(\d{4}-\d{1,2}-\d{1,2})", message.text)\
-            or re.search(r"(\d{4}-\d{1,2})",message.text) or re.search(r"(\d{4})", message.text):
+    elif re.fullmatch(r"(\d{4}-\d{1,2}-\d{1,2})", message.text) \
+            or re.fullmatch(r"(\d{4}-\d{1,2})", message.text) or re.fullmatch(r"(\d{4})", message.text):
         sql = f"SELECT SUM(dead_count),SUM(injured_count),COUNT(tags) FROM data WHERE region = '{region}' AND datetime LIKE '{message.text}%'"
         cursor.execute(sql)
         a = cursor.fetchall()
@@ -264,10 +264,25 @@ def bot_message(message):
         region_1, region_2 = message.text.split(" и ")
         bot.send_message(message.chat.id, "Введите даты\n"
                                           "Например 2017 и 2021; 2015-09-01 и 2018-03-05")
-    if re.search(r"(\d{4}-\d{1,2}-\d{1,2}) и (\d{4}-\d{1,2}-\d{1,2})", message.text) \
-            or re.search(r"(\d{4}-\d{1,2}) и (\d{4}-\d{1,2})", message.text) \
-            or re.search(r"(\d{4} и \d{4})", message.text):
-        bot.send_message("OK")
+    elif re.fullmatch(r"(\d{4}-\d{1,2}-\d{1,2}) и (\d{4}-\d{1,2}-\d{1,2})", message.text) \
+            or re.fullmatch(r"(\d{4}-\d{1,2}) и (\d{4}-\d{1,2})", message.text) \
+            or re.fullmatch(r"(\d{4} и \d{4})", message.text):
+        datetime_1, datetime_2 = message.text.split(" и ")
+        sql1 = f"SELECT SUM(dead_count),SUM(injured_count),COUNT(tags) FROM data WHERE region = '{region_1}' AND datetime LIKE '{datetime_1}%'"
+        cursor.execute(sql1)
+        st1 = cursor.fetchall()
+        sql2 = f"SELECT SUM(dead_count),SUM(injured_count),COUNT(tags) FROM data WHERE region = '{region_2}' AND datetime LIKE '{datetime_2}%'"
+        cursor.execute(sql2)
+        st2 = cursor.fetchall()
+        bot.send_message(message.chat.id, f"В регионе {region_1} за {datetime_1}:\n"
+                                          f"Смертность в дтп: {st1[0][0]}\n"
+                                          f"Раненые: {st1[0][1]}\n"
+                                          f"Количество дтп: {st1[0][2]}\n"
+                                          f"\n"
+                                          f"В регионе {region_2} за {datetime_2}:\n"
+                                          f"Смертность в дтп: {st2[0][0]}\n"
+                                          f"Раненые: {st2[0][1]}\n"
+                                          f"Количество дтп: {st2[0][2]}\n")
 
 
 bot.polling()
