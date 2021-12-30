@@ -4,4 +4,5 @@ from telebot import types
 
 menubutton1 = types.KeyboardButton('Просмотр статистики')
 menubutton2 = types.KeyboardButton('Сравнение')
+menubutton3 = types.KeyboardButton('Назад')
 
