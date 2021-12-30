@@ -154,10 +154,23 @@ def bot_message(message):
         sql = f"SELECT SUM(dead_count),SUM(injured_count),COUNT(tags) FROM data WHERE region = '{region}' AND datetime LIKE '{message.text}%'"
         cursor.execute(sql)
         a = cursor.fetchall()
-        bot.send_message(message.chat.id, f"В регионе {region}:\n"
+        sql = "SELECT category FROM data GROUP BY category ORDER BY COUNT(*) DESC LIMIT 1"
+        cursor.execute(sql)
+        b = cursor.fetchall()
+        sql = "SELECT light FROM data GROUP BY light ORDER BY COUNT(*) DESC LIMIT 1"
+        cursor.execute(sql)
+        c = cursor.fetchall()
+        sql = "SELECT weather FROM data GROUP BY weather ORDER BY COUNT(*) DESC LIMIT 1"
+        cursor.execute(sql)
+        d = cursor.fetchall()
+        bot.send_message(message.chat.id, f"В регионе {region} за {message.text}:\n"
                                           f"Смертность в дтп: {a[0][0]}\n"
                                           f"Раненые: {a[0][1]}\n"
-                                          f"Количество дтп: {a[0][2]}")
+                                          f"Количество дтп: {a[0][2]}\n"
+                                          f"Наиболее частый тип дтп: {b[0][0]}\n"
+                                          f"Время суток с наибольшим кол-вом дтп: {c[0][0]}\n"
+                                          f"В какую погоду больше всего дтп: {d[0][0]}")
+
 
 
 bot.polling()
