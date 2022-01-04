@@ -64,7 +64,7 @@ def bot_message(message):
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
         markup.add(menubutton3)
         bot.send_message(message.chat.id, "Выберите регион:", reply_markup=markup)
-        bot.send_message(message.chat.id, "1. Республика Адыгея\n "
+        bot.send_message(message.chat.id, "1. Республика Адыгея\n"
                                           "2. Республика Алтай\n"
                                           "3. Республика Башкортостан\n"
                                           "4. Республика Бурятия\n"
@@ -149,10 +149,10 @@ def bot_message(message):
                                           "83. Ханты-Мансийский автономный округ\n"
                                           "84. Чукотский автономный округ\n"
                                           "85. Ямало-Ненецкий автономный округ\n", reply_markup=markup)
-    if message.text in region_lst:
+    elif message.text in region_lst:
         region = message.text
         bot.send_message(message.chat.id, "Укажите дату в формате YYYY-MM-DD или YYYY-MM или YYYY")
-    if re.fullmatch(r"(\d{4}-\d{1,2}-\d{1,2})", message.text) \
+    elif re.fullmatch(r"(\d{4}-\d{1,2}-\d{1,2})", message.text) \
             or re.fullmatch(r"(\d{4}-\d{1,2})", message.text) or re.fullmatch(r"(\d{4})", message.text):
         sql = f"SELECT SUM(dead_count),SUM(injured_count),COUNT(tags) FROM data WHERE region = '{region}' AND datetime LIKE '{message.text}%'"
         cursor.execute(sql)
@@ -177,7 +177,7 @@ def bot_message(message):
         else:
             bot.send_message(message.chat.id, "В это время не произошло ни одного дтп 👍")
 
-    if message.text == "Сравнение":
+    elif message.text == "Сравнение":
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
         markup.add(menubutton3)
         bot.send_message(message.chat.id, "Выберите регионы для сравнения\n"
@@ -271,7 +271,7 @@ def bot_message(message):
         region_1, region_2 = message.text.split(" и ")
         bot.send_message(message.chat.id, "Введите даты\n"
                                           "Например 2017 и 2021; 2015-09-01 и 2018-03-05")
-    if re.fullmatch(r"(\d{4}-\d{1,2}-\d{1,2}) и (\d{4}-\d{1,2}-\d{1,2})", message.text) \
+    elif re.fullmatch(r"(\d{4}-\d{1,2}-\d{1,2}) и (\d{4}-\d{1,2}-\d{1,2})", message.text) \
             or re.fullmatch(r"(\d{4}-\d{1,2}) и (\d{4}-\d{1,2})", message.text) \
             or re.fullmatch(r"(\d{4} и \d{4})", message.text):
         datetime_1, datetime_2 = message.text.split(" и ")
@@ -311,13 +311,15 @@ def bot_message(message):
         plt.savefig('img/1.png')
 
         bot.send_photo(message.chat.id, open("img/1.png", 'rb'))
-    if message.text == "Назад":
+    elif message.text == "Назад":
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
         menubutton1 = types.KeyboardButton('Просмотр статистики')
         menubutton2 = types.KeyboardButton('Сравнение')
         markup.add(menubutton1, menubutton2)
         bot.send_message(message.chat.id, 'Выберите режим работы: \n 1. 📈 Просмотр статистики \n 2. 📊 Сравнение',
                          reply_markup=markup)
+    else:
+        bot.send_message(message.chat.id,"Ошибка ввода, попробуйте снова")
 
 
 bot.polling(none_stop=True)
